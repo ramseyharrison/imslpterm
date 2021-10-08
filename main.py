@@ -69,7 +69,7 @@ def get_local_composition(composer_id, composition_id):
 #invokes IMSLP package
 #name must be properly formatted IMSLP category name
 
-def addNewComposer(name):
+def add_new_composer(name):
     PATH = LIST_JSON_PATH  
     composers = json_helpers.read_json(PATH)
     composers.append(
@@ -84,7 +84,7 @@ def addNewComposer(name):
         lambda f: f.write(json.dumps(composers)))
     process_composer(name)
 
-#addNewComposer("Brahms, Johannes")
+#add_new_composer("Brahms, Johannes")
 
 
 #example of desired features
