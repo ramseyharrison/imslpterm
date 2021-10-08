@@ -49,7 +49,6 @@ def fetch_imslp_json(composer):
         "w",
         lambda f: f.write(json.dumps(works)))
 
-#returns dict of composer according to local id
 
 def local_composer_list():
     return json_helpers.read_json(LIST_JSON_PATH)
@@ -68,7 +67,7 @@ def get_local_composition(composer_id, composition_id):
 #method called to add new composer to local library
 #invokes IMSLP package
 #name must be properly formatted IMSLP category name
-
+#writes compositions to a json file
 def add_new_composer(name):
     PATH = LIST_JSON_PATH  
     composers = json_helpers.read_json(PATH)
