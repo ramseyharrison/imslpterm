@@ -43,14 +43,8 @@ def get_local_composition(composer_id, composition_id):
 
 #method called to add new composer to local library
 #invokes IMSLP package
-#name must be properly formatted IMSLP category name
-<<<<<<< HEAD
 
-def add_new_composer(composer):
-=======
-#writes compositions to a json file
 def add_new_composer(name):
->>>>>>> b307388b1a52fa83417dfd9d62ee77deb10bec72
     PATH = LIST_JSON_PATH  
    
     fetch_imslp_json(composer) #calls IMSLP package
@@ -90,7 +84,7 @@ def add_new_composer(name):
         "w",
         lambda f: f.write(json.dumps(composers)))
 
-add_new_composer("Debussy, Claude")
+#add_new_composer("Debussy, Claude")
 #add_new_composer("Brahms, Johannes")
 
 
@@ -103,7 +97,6 @@ def get_images(composition):
     link = composition['permlink']
     #client.get_images(link) 
     pass
-<<<<<<< HEAD
 
 def get_name_from_permlink(permlink):
     return permlink[permlink.rindex('/')+1]
@@ -117,6 +110,4 @@ def get_image_metadata(composition):
     # with open("test.pdf",'wb') as f:
     #     images[0]['obj'].download(f)
     
-get_image_metadata(get_local_composition(1,10))
-=======
->>>>>>> b307388b1a52fa83417dfd9d62ee77deb10bec72
+
