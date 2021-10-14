@@ -11,9 +11,7 @@ LOCAL_JSON_PATH = DIRPATH + '/local_json/{composer}.json'
 LIST_JSON_PATH = DIRPATH + '/composers.json'
 
 
-#Main method for getting and storing IMSLP composer information
-def process_composer(composer):
-    pass
+
 
 
 def fetch_imslp_json(composer):
