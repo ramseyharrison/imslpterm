@@ -9,17 +9,6 @@ DIRPATH = os.path.abspath(os.path.dirname(__file__))
 IMSLP_JSON_PATH = DIRPATH + '/imslp_json/{composer}.json'
 LIST_JSON_PATH = DIRPATH + '/composers.json'
 
-
-def fetch_imslp_json(composer):
-    client = ImslpClient()
-    PATH = IMSLP_JSON_PATH
-
-    works = list(client.search_works(composer=composer))
-    return helpers.interact_with_json_file(
-        PATH.format(composer=composer),
-        "w",
-        lambda f: f.write(json.dumps(works)))
-
 # returns dict of composer according to local id
 
 
@@ -27,7 +16,6 @@ def local_composer_list():
     return helpers.read_json(LIST_JSON_PATH)
 
 # returns dict of composition from local ids
-
 
 def composition_list(composer_id):
     composer_object_name = helpers.read_json(LIST_JSON_PATH)[composer_id]['name']
