@@ -1,19 +1,13 @@
 import os
 import json
-import json_helpers
+import helpers
 import mwclient
 from imslp.client import ImslpClient
 from imslp.interfaces import scraping
 
 DIRPATH = os.path.abspath(os.path.dirname(__file__))
 IMSLP_JSON_PATH = DIRPATH + '/imslp_json/{composer}.json'
-LOCAL_JSON_PATH = DIRPATH + '/local_json/{composer}.json'
 LIST_JSON_PATH = DIRPATH + '/composers.json'
-
-
-#Main method for getting and storing IMSLP composer information
-def process_composer(composer):
-    pass
 
 
 def fetch_imslp_json(composer):
@@ -21,102 +15,84 @@ def fetch_imslp_json(composer):
     PATH = IMSLP_JSON_PATH
 
     works = list(client.search_works(composer=composer))
-    return json_helpers.interact_with_json_file(
+    return helpers.interact_with_json_file(
         PATH.format(composer=composer),
         "w",
         lambda f: f.write(json.dumps(works)))
 
+# returns dict of composer according to local id
+
 
 def local_composer_list():
-    return json_helpers.read_json(LIST_JSON_PATH)
+    return helpers.read_json(LIST_JSON_PATH)
 
-#returns dict of composition from local ids
-def get_local_composition(composer_id, composition_id):
-
-    try:
-        composer_object_name = json_helpers.read_json(LIST_JSON_PATH)[composer_id]['name']
-        return json_helpers.read_json(LOCAL_JSON_PATH.format(composer=composer_object_name))[composition_id]
-    except IndexError:
-        print("get_local_composition : index error")
-        return None
+# returns dict of composition from local ids
 
 
-#method called to add new composer to local library
-#invokes IMSLP package
-#name must be properly formatted IMSLP category name
-<<<<<<< HEAD
+def composition_list(composer_id):
+    composer_object_name = helpers.read_json(LIST_JSON_PATH)[composer_id]['name']
+    return helpers.read_json(IMSLP_JSON_PATH.format(composer=composer_object_name))
+
+# method called to add new composer to local library
+# invokes IMSLP package
+# name must be properly formatted IMSLP category name
+
 
 def add_new_composer(composer):
-=======
-#writes compositions to a json file
-def add_new_composer(name):
->>>>>>> b307388b1a52fa83417dfd9d62ee77deb10bec72
-    PATH = LIST_JSON_PATH  
-   
-    fetch_imslp_json(composer) #calls IMSLP package
-    cleaned_compositions = []
-    compositions = json_helpers.read_json(
-        IMSLP_JSON_PATH.format(composer=composer))
-    compositions.sort(key=lambda x: x['intvals']['worktitle']) #sorts by worktitle name
+    #imslp_package client
+    client = ImslpClient()
 
-    for index in range(len(compositions)):
-        #stores desired information from IMSLP package search 
-        #cat would be the official catalog number of composition, if it exists(not intval icatno)
-        #for purpose of url_images see get_images()
-        cleaned_compositions.append(
-            {
-                'id':   index,
-                'title': compositions[index]['intvals']['worktitle'],
-                'permlink': compositions[index]['permlink'],
-                'cat': "",
-                'url_images': []
-            }
-        )
+    #ensure needed directories exist
+    try:
+        helpers.directory_check()
+    except:
+        print("Error with directories")
+        return None
+    
+    works = list(client.search_works(composer=composer))
+    works.sort(key=lambda x: x['intvals']['worktitle'])
 
-    json_helpers.interact_with_json_file(LOCAL_JSON_PATH.format(
+    
+    #change id a local integer id
+    counter = 0 
+    for x in works:
+        x['id'] = counter
+        counter += 1
+
+    helpers.interact_with_json_file(IMSLP_JSON_PATH.format(
         composer=composer),
         "w",
-        lambda f: f.write(json.dumps(cleaned_compositions)))
-
-    composers = json_helpers.read_json(PATH)
+        lambda f: f.write(json.dumps(works)))
+    
+    composers = helpers.read_json(LIST_JSON_PATH)
     composers.append(
         {
-            "id": len(composers), #local ID for composer
+            "id": len(composers),  # local ID for composer
             "name": composer,
         }
     )
-    json_helpers.interact_with_json_file(
-        PATH,
+    helpers.interact_with_json_file(
+        LIST_JSON_PATH,
         "w",
         lambda f: f.write(json.dumps(composers)))
-
-add_new_composer("Debussy, Claude")
-#add_new_composer("Brahms, Johannes")
-
-
-#example of desired features
-def get_images(composition):
-    #method would expect a local composition dictionary
-    #and from its permlink(stored IMSLP package's permlink) would request image links from IMSLP
-    #and store them in the local dictionary attributed to each composition(created in process_composer)
-
-    link = composition['permlink']
-    #client.get_images(link) 
-    pass
-<<<<<<< HEAD
-
-def get_name_from_permlink(permlink):
-    return permlink[permlink.rindex('/')+1]
-
-def get_image_metadata(composition):
-    site = mwclient.Site('imslp.org',path='/') 
-    page = mwclient.page.Page(site,name=get_name_from_permlink(composition['permlink']))
-    images = scraping.fetch_images_metadata(page)
-    for image in images:
-        print(image)
-    # with open("test.pdf",'wb') as f:
-    #     images[0]['obj'].download(f)
     
-get_image_metadata(get_local_composition(1,10))
-=======
->>>>>>> b307388b1a52fa83417dfd9d62ee77deb10bec72
+
+def remove_composer(composer):
+    composers = local_composer_list()
+    new_list = []
+    counter = 0
+    for x in composers:
+        if(x['name'] == composer):
+            continue
+        new_list.append(
+            {
+                "id": counter,
+                "name" : x['name'],
+            }
+        )
+        counter+=1
+    helpers.interact_with_json_file(
+        LIST_JSON_PATH,
+        "w",
+        lambda f: f.write(json.dumps(new_list)))
+
