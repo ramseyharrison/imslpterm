@@ -1,22 +1,23 @@
 import sys
 import main
 from collections import deque
+from parser import main
 
+BASE_STR = "{}"
 ID_STR_FMT = "{} : {}"
-
 COMPOSER_LIST = "list-composers"
 COMPOSITION_LIST = "list-compositions"
 ADD_COMPOSER = "add-composer"
 REMOVE_COMPOSER = "remove-composer"
 COMPOSITION_PAGE = "composition"
 
-def id_str_fmt(tuple):
-    return ID_STR_FMT.format(*tuple)
+def str_fmt(fmt_str, fmt_tuple):
+    return fmt_str.format(*fmt_tuple)
 
-def list_table_output(list, format_tuple):
+def list_table_output(list, format_str, format_tuple):
     str = ""
     for x in list:
-        str += id_str_fmt(format_tuple(x)) + "\n"
+        str += (format_tuple(x)) + "\n"
     return str
 
 def parse(args: list) -> str:
@@ -28,7 +29,7 @@ def parse(args: list) -> str:
         return_msg = list_table_output(method, tuple)
     elif(command == COMPOSITION_LIST):
         method = main.composition_list(int(args.popleft()))
-        def tuple(x): return (x['id'], x['intvals']['worktitle'])
+        def tuple(x): return (x['id'], x['Page Name'])
         return_msg = list_table_output(method, tuple)
 
     elif(command == ADD_COMPOSER):
@@ -37,6 +38,7 @@ def parse(args: list) -> str:
             print("Calling IMSLP package for " + composer_name)
             main.add_new_composer(composer_name)
         except:
+            raise
             main.remove_composer(composer_name)
         return_msg = "Succesfully Added " + composer_name
 
@@ -58,6 +60,12 @@ def parse(args: list) -> str:
             return_msg = "Composition/Composer doesn't exist\n"
     return return_msg
 
-queue = deque(sys.argv)
-queue.popleft()
-sys.stdout.write(parse(queue))
+
+def parse_2(args:list) -> str:
+    msg = ""
+    composer = args.popleft()
+    if(not args):
+        data = main.composition_list(composer)
+        def tuple(x): return (x['Page Name'])
+        msg = list_table_output(data, BASE_STR, tuple)
+    return msg 

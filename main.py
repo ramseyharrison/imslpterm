@@ -1,69 +1,75 @@
 import os
-import json
 import helpers
-import mwclient
-from imslp.client import ImslpClient
+from helpers import add_id_to_list_dict,read_json,write_to_json
 from imslp.interfaces import scraping
 
 DIRPATH = os.path.abspath(os.path.dirname(__file__))
-IMSLP_JSON_PATH = DIRPATH + '/imslp_json/{composer}.json'
+IMSLP_JSON_PATH = DIRPATH + '/composer_json/{composer}.json'
 LIST_JSON_PATH = DIRPATH + '/composers.json'
-
+SAVED_JSON_PATH = DIRPATH + '/saved.json'
 # returns dict of composer according to local id
 
+def imslp_list(x) : return add_id_to_list_dict(list(scraping.fetch_category_table(category_name = x)))
+def get_local_list(x) : return read_json(IMSLP_JSON_PATH.format(composer=x))
 
 def local_composer_list():
     return helpers.read_json(LIST_JSON_PATH)
+def is_local(composer_name):
+    names = []
+    list = local_composer_list()
+    if(list is None):
+        return False
+    for x in list:
+        names.append(x['name'])
+    return composer_name in names
 
-# returns dict of composition from local ids
+def composition_list(composer):
+    compositions = lambda y, x : y(x)
+    method = imslp_list #default method
+    data = composer
+    try:
+        composer = int(composer) #check to see if CL argument was a local "id"
+        composer_object = helpers.read_json(LIST_JSON_PATH)[composer]
+        method = get_local_list
+        data = composer_object['name']
 
-def composition_list(composer_id):
-    composer_object_name = helpers.read_json(LIST_JSON_PATH)[composer_id]['name']
-    return helpers.read_json(IMSLP_JSON_PATH.format(composer=composer_object_name))
-
-# method called to add new composer to local library
-# invokes IMSLP package
-# name must be properly formatted IMSLP category name
+    except ValueError:
+        if(is_local(composer)):
+            method = get_local_list
+    
+    return compositions(method,data)
 
 
 def add_new_composer(composer):
-    #imslp_package client
-    client = ImslpClient()
+    # imslp_package client
 
-    #ensure needed directories exist
+    # ensure needed directories exist
     try:
-        helpers.directory_check()
+        helpers.composer_directory_check()
     except:
         print("Error with directories")
         return None
-    
-    works = list(client.search_works(composer=composer))
-    works.sort(key=lambda x: x['intvals']['worktitle'])
+    try:
+        works = composition_list(composer)
+    except ConnectionError:
+        print("Invalid Composer Name")
+        return None 
 
-    
-    #change id a local integer id
-    counter = 0 
-    for x in works:
-        x['id'] = counter
-        counter += 1
-
-    helpers.interact_with_json_file(IMSLP_JSON_PATH.format(
-        composer=composer),
-        "w",
-        lambda f: f.write(json.dumps(works)))
-    
-    composers = helpers.read_json(LIST_JSON_PATH)
+    works = helpers.add_id_to_list_dict(works)
+    composers = local_composer_list()
+    if(composers is None):
+        composers = []
+        f = open(LIST_JSON_PATH, 'w')
+        
     composers.append(
         {
             "id": len(composers),  # local ID for composer
             "name": composer,
         }
     )
-    helpers.interact_with_json_file(
-        LIST_JSON_PATH,
-        "w",
-        lambda f: f.write(json.dumps(composers)))
-    
+   
+    write_to_json(LIST_JSON_PATH,composers)
+    write_to_json(IMSLP_JSON_PATH.format(composer=composer),works)
 
 def remove_composer(composer):
     composers = local_composer_list()
@@ -75,12 +81,11 @@ def remove_composer(composer):
         new_list.append(
             {
                 "id": counter,
-                "name" : x['name'],
+                "name": x['name'],
             }
         )
-        counter+=1
-    helpers.interact_with_json_file(
-        LIST_JSON_PATH,
-        "w",
-        lambda f: f.write(json.dumps(new_list)))
+        counter += 1
+
+    write_to_json(LIST_JSON_PATH,new_list)
+
 

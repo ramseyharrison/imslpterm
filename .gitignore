@@ -1,5 +1,5 @@
 env/
-imslp_json/
+composer_json/
 *.json
 __pycache__
 *.pyc
