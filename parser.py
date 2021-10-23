@@ -32,6 +32,7 @@ else:
     else:            
         data = (composition_list(args.composer))
         name = 'Page Name'
+if(data):
+    output = list_table_output(data,ID_STR_FMT, fmt_tuple_id_name(name))
+    sys.stdout.write(output)
 
-output = list_table_output(data,ID_STR_FMT, fmt_tuple_id_name(name))
-sys.stdout.write(output)
