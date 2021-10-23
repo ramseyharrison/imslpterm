@@ -30,3 +30,5 @@ will yield the same result as
 ```
 python3 parser.py "Brahms, Johannes"
 ```
+
+This project is entirely dependent on the IMSLP package found here https://github.com/jlumbroso/imslp
