@@ -1,5 +1,5 @@
 import sys
-from main import add_new_composer, composition_list,local_composer_list
+from main import add_new_composer, get_imslp_list, get_local_list,local_composer_list,list_by_id, is_local
 import argparse
 ID_STR_FMT = "{} : {}"
 
@@ -21,18 +21,23 @@ output = ""
 data = []
 if(args.save):
     add_new_composer(args.composer)
-elif(args.composition):
-    data.append(composition_list(args.composer)[int(args.composition)])
-    name = 'Page Name'
-
+# elif(args.composition):
+#     data.append(composition_list(args.composer)[int(args.composition)])
+#     name = 'Page Name'
 else:
     if(args.composer == "list"):
         data = local_composer_list()
         name = 'name'
-    else:            
-        data = (composition_list(args.composer))
+    elif(args.composer.isnumeric()):            
+        data = list_by_id(int(args.composer))
+        name = 'Page Name'
+    else:
+        if(is_local(args.composer)):
+            data = get_local_list(args.composer)
+        else:
+            data = get_imslp_list(args.composer)
+
         name = 'Page Name'
 if(data):
     output = list_table_output(data,ID_STR_FMT, fmt_tuple_id_name(name))
     sys.stdout.write(output)
-

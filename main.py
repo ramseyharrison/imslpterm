@@ -1,5 +1,7 @@
 import os
 from typing import Type
+
+from requests.api import get
 import helpers
 from helpers import add_id_to_list_dict,read_json,write_to_json
 from imslp.interfaces import scraping
@@ -10,14 +12,18 @@ LIST_JSON_PATH = DIRPATH + '/composers.json'
 SAVED_JSON_PATH = DIRPATH + '/saved.json'
 # returns dict of composer according to local id
 
-def imslp_list(x) : return add_id_to_list_dict(list(scraping.fetch_category_table(category_name = x)))
+def get_imslp_list(x) : return add_id_to_list_dict(list(scraping.fetch_category_table(category_name = x)))
 
 def get_local_list(x) : return read_json(IMSLP_JSON_PATH.format(composer=x))
 
-#returns list of locally stored composers
-def local_composer_list():
-    return helpers.read_json(LIST_JSON_PATH)
+def local_composer_list(): return helpers.read_json(LIST_JSON_PATH)
 
+def list_by_id(id):
+    try:
+        composer = local_composer_list()[id]
+        return get_local_list(composer['name'])
+    except:
+        print("ID doesn't exist")
 #checks if composer name is local
 def is_local(composer_name):
     names = []
@@ -32,31 +38,6 @@ def is_local(composer_name):
 #excepts either a local ID generated upon add_new_composer
 #or a IMSLP composer name
 
-def composition_list(composer):
-    compositions = lambda y, x : y(x)
-    method = imslp_list #default method
-    data = composer
-    
-    try:
-        composer = int(composer) #check to see if CL argument was a local "id"
-        list = local_composer_list()
-        composer_object = {}
-        try:
-            composer_object = list[composer]
-        except TypeError:
-            print("No Saved Composers")
-            return None
-        except IndexError:
-            print("ID doesn't exist")
-            return None
-        method = get_local_list
-        data = composer_object['name']
-    except ValueError:
-        if(is_local(composer)):
-            method = get_local_list
-
-    return compositions(method,data)
-
 
 def add_new_composer(composer):
 
@@ -66,14 +47,12 @@ def add_new_composer(composer):
     except:
         print("Error with directories")
         return None
-
     try:
-        works = composition_list(composer)
+        works = get_imslp_list(composer)
     except ConnectionError:
         print("Invalid Composer Name")
         return None 
 
-    works = helpers.add_id_to_list_dict(works)
     composers = local_composer_list()
     if(composers is None):
         composers = []
@@ -103,7 +82,4 @@ def remove_composer(composer):
             }
         )
         counter += 1
-
     write_to_json(LIST_JSON_PATH,new_list)
-
-
