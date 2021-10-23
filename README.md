@@ -1,16 +1,32 @@
 # imslp-json
 
-Set of methods which interact with data taken from the IMSLP package by jlumbroso(https://github.com/jlumbroso/imslp)
+terminal interface meant for accessing composer information and works from IMSLP composers
 
-the main method add_new_composer does two things:
+As of now, you can fetch the composition lists of any IMSLP composer with : 
 
-1)calls search_works() method from the imslp package, turns the data into a list, and stores it locally as json
-2)takes this recently generated json and extracts specific pieces of information - namely title,permlink - assigns an id, serving as the equivalent of a local catalog number for each composition, and writes all this data into another json file
+```
+python3 parser.py "Brahms, Johannes" 
+```
+where you can replace ```"Brahms, Johannes"``` with any properly formatted IMSLP category name
 
-The reason the imslp package json is stored is simply because each call to search_works is lengthy, and so saving a local copy of what the function returns is more efficient.
+You can also locally store any of these composers and their information, with :
 
-There's also another json file that stores which composers have been "fetched" from the IMSLP package. Each call creates a record for a new composer, along with a local id.
-
-add_new_composer expects(as does search_works() from imslp) a properly formatted "category name" from IMSLP website.
-proper usage looks like add_new_composer("Beethoven, Ludwig van"), or add_new_composer("Schubert, Franz")
-
+```
+python3 parser.py "Brahms, Johannes" -s 
+```
+Once this is done, Brahms will get a local id associated to it, which can be found by running
+```
+python3 parser.py list
+```
+The output would look like : 
+```
+0 : Brahms, Johannes
+```
+Where ```0``` is the local ID for Brahms. After that, running 
+```
+python3 parser.py 0 
+```
+will yield the same result as 
+```
+python3 parser.py "Brahms, Johannes"
+```
