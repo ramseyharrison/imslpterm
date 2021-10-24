@@ -1,4 +1,4 @@
-# imslp-json
+# imslpterm
 
 terminal interface meant for accessing composer information and works from IMSLP composers
 
