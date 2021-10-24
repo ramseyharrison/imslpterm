@@ -10,7 +10,6 @@ DIRPATH = os.path.abspath(os.path.dirname(__file__))
 IMSLP_JSON_PATH = DIRPATH + '/composer_json/{composer}.json'
 LIST_JSON_PATH = DIRPATH + '/composers.json'
 SAVED_JSON_PATH = DIRPATH + '/saved.json'
-# returns dict of composer according to local id
 
 def get_imslp_list(x) : return add_id_to_list_dict(list(scraping.fetch_category_table(category_name = x)))
 
@@ -24,6 +23,7 @@ def list_by_id(id):
         return get_local_list(composer['name'])
     except:
         print("ID doesn't exist")
+        
 #checks if composer name is local
 def is_local(composer_name):
     names = []
